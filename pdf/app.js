@@ -3,7 +3,7 @@ document.getElementById('pdfForm').onsubmit = async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
 
-  const res = await fetch('https://oefenplus-backend.onrender.com/pdf', {
+  const res = await fetch('https://oefenplus-backend-pdf.onrender.com', {
     method: 'POST',
     body: formData
   });
