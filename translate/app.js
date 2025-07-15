@@ -2,7 +2,7 @@
 document.getElementById('uploadForm').onsubmit = async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
-  const res = await fetch('https://oefenplus-backend.onrender.com/api/convert-file', {
+  const res = await fetch('https://oefenplus-backend.onrender.com/api/translate', {
     method: 'POST',
     body: formData
   });
