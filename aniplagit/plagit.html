@@ -1,0 +1,70 @@
+<!-- brauzerda https://oefenplus.uz/aniplagit/ -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plagiat tekshirish - Oefen</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #FF973F, #B33F21);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
+
+  <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
+    <a href="https://oefen.uz">
+      <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
+    </a>
+    <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
+  </header>
+
+  <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">1. Matnli faylni yuklang</h2>
+    <input id="fileInput" type="file" accept=".pdf,.docx,.txt" class="mb-4 w-full" />
+    <button id="checkBtn" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Plagiatni tekshirish</button>
+
+    <div id="loading" class="mt-4 hidden text-gray-600">⏳ Tekshirilmoqda...</div>
+
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-2">2. Ajratilgan matn:</h3>
+      <textarea id="outputText" class="w-full h-64 p-2 border rounded" readonly></textarea>
+      <h3 class="text-lg font-semibold mt-4">3. Plagiat darajasi:</h3>
+      <p id="plagiarismResult" class="text-xl font-bold text-red-600"></p>
+    </div>
+  </section>
+
+  <script>
+    document.getElementById("checkBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      if (fileInput.files.length === 0) {
+        alert("Iltimos, fayl tanlang.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      document.getElementById("loading").classList.remove("hidden");
+
+      const res = await fetch("/api/check", {
+        method: "POST",
+        body: formData
+      });
+
+      document.getElementById("loading").classList.add("hidden");
+
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById("outputText").value = data.text;
+        document.getElementById("plagiarismResult").textContent = data.plagiarism + "% o‘xshashlik aniqlandi.";
+      } else {
+        const err = await res.json();
+        alert("Xatolik: " + err.error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!-- brauzerda https://oefenplus.uz/ocr/  -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rasm yoki PDF dan matn ajratish - Oefen OCR</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #FF973F, #B33F21);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
+
+  <!-- Header -->
+  <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
+    <a href="https://oefen.uz">
+      <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
+    </a>
+    <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
+  </header>
+
+  <!-- Upload Area -->
+  <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">1. Rasm yoki PDF-ni yuklang</h2>
+    <input id="fileInput" type="file" accept="image/*,.pdf" class="mb-4 w-full" />
+    <button id="extractBtn" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Matnni ajratish</button>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="mt-4 hidden text-gray-600">⏳ Matn ajratilmoqda...</div>
+
+    <!-- Output Text -->
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-2">2. Ajratilgan matn:</h3>
+      <textarea id="outputText" class="w-full h-64 p-2 border rounded" readonly></textarea>
+      <button onclick="copyText()" class="mt-2 bg-green-600 text-white py-1 px-3 rounded hover:bg-green-700">📋 Nusxalash</button>
+    </div>
+  </section>
+
+  <script>
+    async function extractText(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      document.getElementById("loading").classList.remove("hidden");
+      const res = await fetch("https://api.ocr.space/parse/image", {
+        method: "POST",
+        headers: {
+          "apikey": "K82865113488957" // <-- Real API kalit ishlatilmoqda
+        },
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById("loading").classList.add("hidden");
+      const parsedText = data.ParsedResults?.[0]?.ParsedText || "Matn topilmadi.";
+      document.getElementById("outputText").value = parsedText;
+    }
+
+    document.getElementById("extractBtn").addEventListener("click", () => {
+      const fileInput = document.getElementById("fileInput");
+      if (fileInput.files.length === 0) {
+        alert("Iltimos, fayl tanlang.");
+        return;
+      }
+      extractText(fileInput.files[0]);
+    });
+
+    function copyText() {
+      const output = document.getElementById("outputText");
+      output.select();
+      document.execCommand("copy");
+      alert("Matn nusxalandi!");
+    }
+  </script>
+</body>
+</html>
