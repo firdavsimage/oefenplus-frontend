@@ -3,7 +3,7 @@ document.getElementById('compressForm').onsubmit = async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
 
-  const res = await fetch('https://oefenplus-backend.onrender.com/converter', {
+  const res = await fetch('https://oefenplus-backend.onrender.com/convertor', {
     method: 'POST',
     body: formData
   });
