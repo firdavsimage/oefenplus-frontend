@@ -1,21 +1,42 @@
-// pdf/app.js
-document.getElementById('pdfForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
+const fileInput = document.getElementById("fileInput");
+const uploadBtn = document.getElementById("uploadBtn");
+const statusMsg = document.getElementById("statusMessage");
+const resultSection = document.getElementById("resultSection");
+const downloadLink = document.getElementById("downloadLink");
 
-  const res = await fetch('https://oefenplus-backend-pdf.onrender.com', {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!res.ok) {
-    alert("PDFga aylantirishda xatolik.");
+uploadBtn.addEventListener("click", async () => {
+  if (fileInput.files.length === 0) {
+    alert("Iltimos, hech bo‘lmaganda bitta fayl tanlang.");
     return;
   }
 
-  const blob = await res.blob();
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = "converted.pdf";
-  link.click();
-};
+  statusMsg.textContent = "⏳ Yuklanmoqda...";
+  statusMsg.classList.remove("hidden");
+  resultSection.classList.add("hidden");
+
+  const formData = new FormData();
+  for (let i = 0; i < fileInput.files.length; i++) {
+    formData.append("files", fileInput.files[i]);
+  }
+
+  try {
+    const res = await fetch("https://oefenplus-backend-pdf.onrender.com/convert", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Xatolik yuz berdi");
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    downloadLink.href = url;
+    downloadLink.download = "natija.pdf";
+    resultSection.classList.remove("hidden");
+    statusMsg.classList.add("hidden");
+  } catch (err) {
+    statusMsg.textContent = "❌ Xatolik yuz berdi. Qayta urinib ko‘ring.";
+  }
+});
