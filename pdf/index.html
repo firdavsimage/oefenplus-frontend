@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kiril-Lotin Konvertor - Oefen.uz</title>
+  <title>PDF Konvertor - Oefen.uz</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
@@ -14,6 +13,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
 
+  <!-- Header -->
   <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
     <a href="https://oefen.uz">
       <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
@@ -21,24 +21,13 @@
     <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
   </header>
 
+  <!-- PDF Converter Area -->
   <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
     <div class="mb-10">
-      <h2 class="text-xl font-semibold mb-4">1. Matnni kiriting</h2>
-      <textarea id="inputText" class="w-full h-40 p-2 border rounded mb-4" placeholder="Kiril yoki lotin matnini kiriting..."></textarea>
-      <button onclick="convertText()" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">O‘girish</button>
-
-      <div class="mt-6">
-        <h3 class="text-lg font-semibold mb-2">2. O‘girilgan matn:</h3>
-        <textarea id="outputText" class="w-full h-40 p-2 border rounded" readonly></textarea>
-        <button onclick="copyText()" class="mt-2 bg-green-600 text-white py-1 px-3 rounded hover:bg-green-700">📋 Nusxalash</button>
-      </div>
-    </div>
-
-    <div>
-      <h2 class="text-xl font-semibold mb-4">3. Fayl yuklab o‘giring (.docx, .pptx, .xlsx)</h2>
+      <h2 class="text-xl font-semibold mb-4">Faylni tanlang va PDF formatiga o‘giring</h2>
       <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".docx,.pptx,.xlsx" required class="mb-4 w-full" />
-        <button type="submit" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">Faylni o‘girish</button>
+        <input type="file" name="file" accept=".docx,.pptx,.xlsx,.jpg,.jpeg,.png" required class="mb-4 w-full border rounded p-2" />
+        <button type="submit" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">PDFga o‘girish</button>
       </form>
       <div id="downloadLink" class="mt-4 text-blue-700 font-semibold underline"></div>
     </div>
@@ -46,8 +35,9 @@
 
   <script>
     const script = document.createElement("script");
-    script.src = "./js/translate.js?v=" + Date.now();
+    script.src = "./js/pdf.js?v=" + Date.now();
     document.body.appendChild(script);
   </script>
+
 </body>
 </html>
