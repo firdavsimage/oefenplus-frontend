@@ -1,42 +1,39 @@
-const fileInput = document.getElementById("fileInput");
-const uploadBtn = document.getElementById("uploadBtn");
-const statusMsg = document.getElementById("statusMessage");
-const resultSection = document.getElementById("resultSection");
-const downloadLink = document.getElementById("downloadLink");
 
-uploadBtn.addEventListener("click", async () => {
-  if (fileInput.files.length === 0) {
-    alert("Iltimos, hech bo‘lmaganda bitta fayl tanlang.");
+const backendURL = "https://oefenplus-backend-translete.onrender.com";
+
+async function convertText() {
+  const input = document.getElementById('inputText').value;
+  if (!input.trim()) {
+    alert("Matn kiriting.");
     return;
   }
+  const res = await fetch(`${backendURL}/api/convert-text`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: input })
+  });
+  const data = await res.json();
+  document.getElementById('outputText').value = data.converted || "Xatolik yuz berdi.";
+}
 
-  statusMsg.textContent = "⏳ Yuklanmoqda...";
-  statusMsg.classList.remove("hidden");
-  resultSection.classList.add("hidden");
-
-  const formData = new FormData();
-  for (let i = 0; i < fileInput.files.length; i++) {
-    formData.append("files", fileInput.files[i]);
+document.getElementById('uploadForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const res = await fetch(`${backendURL}/api/convert-file`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (data.downloadUrl) {
+    document.getElementById('downloadLink').innerHTML = `<a href="${backendURL}${data.downloadUrl}" target="_blank">Yuklab olish →</a>`;
+  } else {
+    document.getElementById('downloadLink').textContent = "Xatolik yuz berdi.";
   }
+};
 
-  try {
-    const res = await fetch("https://oefenplus-backend-pdf.onrender.com/convert", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      throw new Error("Xatolik yuz berdi");
-    }
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    downloadLink.href = url;
-    downloadLink.download = "natija.pdf";
-    resultSection.classList.remove("hidden");
-    statusMsg.classList.add("hidden");
-  } catch (err) {
-    statusMsg.textContent = "❌ Xatolik yuz berdi. Qayta urinib ko‘ring.";
-  }
-});
+function copyText() {
+  const output = document.getElementById('outputText');
+  output.select();
+  document.execCommand("copy");
+  alert("Matn nusxalandi!");
+}
