@@ -48,6 +48,11 @@
     </div>
   </section>
 
-  <script src="./js/translate.js?v=1.0.1"></script>
+  <!-- JS faylni avtomatik versiya bilan yuklash -->
+  <script>
+    const script = document.createElement("script");
+    script.src = "./js/translate.js?v=" + Date.now();
+    document.body.appendChild(script);
+  </script>
 </body>
 </html>
