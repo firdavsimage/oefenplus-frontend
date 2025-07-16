@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -13,7 +14,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
 
-  <!-- Header -->
   <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
     <a href="https://oefen.uz">
       <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
@@ -21,25 +21,77 @@
     <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
   </header>
 
-  <!-- PDF Converter Area -->
   <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
-    <div class="mb-10">
-      <h2 class="text-xl font-semibold mb-4">Rasmlar yoki fayllarni tanlang va PDF formatiga o‘giring</h2>
-      <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="files" id="fileInput" accept=".jpg,.jpeg,.png" multiple required class="mb-4 w-full border rounded p-2" />
-        <button type="submit" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">PDFga o‘girish</button>
-      </form>
-      <div id="downloadSection" class="mt-6 hidden">
-        <a id="downloadLink" href="#" target="_blank" class="inline-block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">📥 Yuklab olish</a>
-      </div>
-    </div>
+    <h2 class="text-xl font-semibold mb-6">Faylni PDF formatga o‘tkazish</h2>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label class="block mb-2 font-medium">📂 Rasm (.jpg, .png) yoki hujjat (.docx, .pptx, .xlsx) tanlang:</label>
+      <input type="file" id="files" name="file" multiple required  class="mb-4 w-full p-2 border rounded" />
+      <div id="file-list" class="mb-4 text-sm text-gray-700"></div>
+      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">PDF yaratish</button>
+    </form>
+
+    <div id="message" class="mt-4 font-semibold text-green-800"></div>
   </section>
 
-  <!-- Cache-busting JS -->
- <script>
-  const script = document.createElement("script");
-  script.src = "/pdf/js/pdf.js?v=" + Date.now(); // ✅ TO‘G‘RI YO‘L
-  document.body.appendChild(script);
-</script>
+  <script>
+    const filesInput = document.getElementById('files');
+    const fileList = document.getElementById('file-list');
+    const message = document.getElementById('message');
+    const uploadForm = document.getElementById('uploadForm');
+
+    filesInput.addEventListener('change', () => {
+      const files = filesInput.files;
+      if (files.length === 0) {
+        fileList.innerHTML = '';
+        return;
+      }
+      let list = '<ul>';
+      for (let file of files) {
+        list += `<li>📄 ${file.name}</li>`;
+      }
+      list += '</ul>';
+      fileList.innerHTML = list;
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const files = filesInput.files;
+
+      if (files.length === 0) {
+        message.textContent = '❗ Avval fayl tanlang!';
+        return;
+      }
+
+      const isOfficeType = (name) => /\.(docx|pptx|xlsx)$/i.test(name);
+      const officeFiles = [...files].filter(f => isOfficeType(f.name));
+      if (officeFiles.length > 1) {
+        message.textContent = '❗ DOCX, PPTX yoki XLSX faqat bittadan yuklanishi mumkin.';
+        return;
+      }
+
+      const formData = new FormData();
+      for (let file of files) {
+        formData.append('file', file);
+      }
+
+      message.textContent = '⏳ Yuklanmoqda...';
+
+      try {
+        const res = await fetch('https://oefenplus-backend-pdf.onrender.com/api/convert', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Server bilan muammo');
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        message.innerHTML = '✅ PDF tayyor! <a id="download-link" href="' + url + '" download="converted.pdf" class="text-blue-600 underline ml-2">📥 Yuklab olish</a>';
+      } catch (err) {
+        message.textContent = '❌ Xatolik: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
