@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -13,7 +14,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
 
-  <!-- Header -->
   <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
     <a href="https://oefen.uz">
       <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
@@ -21,15 +21,12 @@
     <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
   </header>
 
-  <!-- Converter Area -->
   <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
-    
-    <!-- Text Conversion -->
     <div class="mb-10">
       <h2 class="text-xl font-semibold mb-4">1. Matnni kiriting</h2>
       <textarea id="inputText" class="w-full h-40 p-2 border rounded mb-4" placeholder="Kiril yoki lotin matnini kiriting..."></textarea>
       <button onclick="convertText()" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">O‘girish</button>
-      
+
       <div class="mt-6">
         <h3 class="text-lg font-semibold mb-2">2. O‘girilgan matn:</h3>
         <textarea id="outputText" class="w-full h-40 p-2 border rounded" readonly></textarea>
@@ -37,7 +34,6 @@
       </div>
     </div>
 
-    <!-- File Upload -->
     <div>
       <h2 class="text-xl font-semibold mb-4">3. Fayl yuklab o‘giring (.docx, .pptx, .xlsx)</h2>
       <form id="uploadForm" enctype="multipart/form-data">
@@ -48,7 +44,6 @@
     </div>
   </section>
 
-  <!-- JS faylni avtomatik versiya bilan yuklash -->
   <script>
     const script = document.createElement("script");
     script.src = "./js/translate.js?v=" + Date.now();
