@@ -1,32 +1,57 @@
-document.getElementById("uploadForm").onsubmit = async (e) => {
-  e.preventDefault();
-  const input = document.getElementById("fileInput");
-  const files = input.files;
+document.addEventListener("DOMContentLoaded", () => {
+  const filesInput = document.getElementById('files');
+  const fileList = document.getElementById('file-list');
+  const submitBtn = document.getElementById('submit-btn');
+  const message = document.getElementById('message');
 
-  if (!files.length) {
-    alert("Iltimos, kamida bitta rasm tanlang.");
-    return;
-  }
-
-  const formData = new FormData();
-  for (let i = 0; i < files.length; i++) {
-    formData.append("files", files[i]); // Ko‘p fayl bir nom bilan
-  }
-
-  const res = await fetch("https://oefenplus-backend-pdf.onrender.com/api/convert-images", {
-    method: "POST",
-    body: formData
+  // Fayl ro‘yxatini chiqarish
+  filesInput.addEventListener('change', () => {
+    fileList.innerHTML = '<strong>Tanlangan fayllar:</strong><ul>';
+    for (let file of filesInput.files) {
+      fileList.innerHTML += `<li>${file.name}</li>`;
+    }
+    fileList.innerHTML += '</ul>';
   });
 
-  const data = await res.json();
-  const downloadSection = document.getElementById("downloadSection");
-  const downloadLink = document.getElementById("downloadLink");
+  // PDF yaratish tugmasi bosilganda
+  submitBtn.addEventListener('click', async () => {
+    const files = filesInput.files;
+    const title = document.getElementById('title').value;
 
-  if (data.downloadUrl) {
-    downloadLink.href = "https://oefenplus-backend-pdf.onrender.com" + data.downloadUrl;
-    downloadSection.classList.remove("hidden");
-  } else {
-    downloadLink.textContent = "Xatolik yuz berdi.";
-    downloadSection.classList.remove("hidden");
-  }
-};
+    if (files.length === 0) {
+      message.textContent = '❗ Avval fayl tanlang!';
+      return;
+    }
+
+    const formData = new FormData();
+    for (let file of files) {
+      formData.append('file', file);
+    }
+    if (title) {
+      formData.append('title', title);
+    }
+
+    message.textContent = '⏳ Yuklanmoqda...';
+
+    try {
+      const res = await fetch('https://oefenplus-backend-pdf.onrender.com/api/convert', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) throw new Error('Server bilan muammo');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = title ? title + '.pdf' : 'converted.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      message.textContent = '✅ PDF tayyor va yuklab olindi!';
+    } catch (err) {
+      message.textContent = '❌ Xatolik: ' + err.message;
+    }
+  });
+});
