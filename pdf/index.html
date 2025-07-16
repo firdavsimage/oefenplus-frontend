@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Konvertor - Oefen.uz</title>
+  <title>PDF Konvertor - Oefenplus</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
@@ -25,15 +25,58 @@
 
     <form id="uploadForm" enctype="multipart/form-data">
       <label class="block mb-2 font-medium">📂 Rasm yoki hujjat tanlang:</label>
-      <input type="file" id="files" name="file" multiple required class="mb-4 w-full p-2 border rounded" />
-      <div id="file-list" class="mb-4 text-sm text-gray-700"></div>
+      <input type="file" id="fileInput" name="file" required class="mb-4 w-full p-2 border rounded" />
       <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">PDF yaratish</button>
     </form>
 
     <div id="message" class="mt-4 font-semibold text-green-800"></div>
+    <div id="downloadSection" class="mt-4 hidden">
+      <a id="downloadLink" class="text-blue-700 underline" target="_blank">📥 Yuklab olish</a>
+    </div>
   </section>
 
-  <!-- JavaScript fayl ulanmoqda -->
-  <script src="/pdf/js/pdf-convert.js?v=1"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("uploadForm");
+      const fileInput = document.getElementById("fileInput");
+      const message = document.getElementById("message");
+      const downloadSection = document.getElementById("downloadSection");
+      const downloadLink = document.getElementById("downloadLink");
+
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+
+        if (!fileInput.files.length) {
+          message.innerText = "Iltimos, fayl tanlang.";
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        message.innerText = "⏳ Yuklanmoqda...";
+        downloadSection.classList.add("hidden");
+
+        try {
+          const response = await fetch("https://oefenplus-backend-pdf.onrender.com/api/convert", {
+            method: "POST",
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (data.downloadUrl) {
+            message.innerText = "✅ Muvaffaqiyatli konvertatsiya qilindi.";
+            downloadLink.href = "https://oefenplus-backend-pdf.onrender.com" + data.downloadUrl;
+            downloadSection.classList.remove("hidden");
+          } else {
+            message.innerText = data.error || "❌ Xatolik yuz berdi.";
+          }
+        } catch (error) {
+          message.innerText = "❌ Serverga ulanishda muammo.";
+        }
+      };
+    });
+  </script>
 </body>
 </html>
