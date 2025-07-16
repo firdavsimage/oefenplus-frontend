@@ -44,10 +44,11 @@
     </div>
   </section>
 
-  <script>
-    const script = document.createElement("script");
-    script.src = "./js/translate.js?v=" + Date.now();
-    document.body.appendChild(script);
-  </script>
+ <script>
+  const script = document.createElement("script");
+  script.src = "./js/translate.js?v=" + Date.now(); // ✅ nisbiy yo‘l
+  document.body.appendChild(script);
+</script>
+
 </body>
 </html>
