@@ -42,41 +42,81 @@
     const message = document.getElementById('message');
     const downloadLink = document.getElementById('downloadLink');
     const downloadSection = document.getElementById('downloadSection');
-
-    const convertApiUrl = 'https://v2.convertapi.com/convert/';
     const secret = 'secret_key_cb327f74110b4e506fec5ac629878293_SkxGg3f96e8bcdd9594d8e575c15d3dab7b99';
+
+    const getConvertEndpoint = (filename) => {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') return 'jpg/to/pdf';
+      if (ext === 'doc' || ext === 'docx') return 'docx/to/pdf';
+      if (ext === 'ppt' || ext === 'pptx') return 'pptx/to/pdf';
+      return null;
+    };
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      message.textContent = '⏳ Yuklanmoqda va konvertatsiya qilinmoqda...';
+      message.textContent = '⏳ Yuklanmoqda va PDF ga aylantirilmoqda...';
       downloadSection.classList.add('hidden');
 
       const files = fileInput.files;
       if (files.length === 0) return alert("Fayl tanlanmadi");
 
-      const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append('Files', files[i]);
+      const pdfUrls = [];
+
+      for (const file of files) {
+        const endpoint = getConvertEndpoint(file.name);
+        if (!endpoint) {
+          message.textContent = `❌ Format qo‘llab-quvvatlanmaydi: ${file.name}`;
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const res = await fetch(`https://v2.convertapi.com/convert/${endpoint}?Secret=${secret}`, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await res.json();
+          if (data.Files && data.Files.length > 0) {
+            pdfUrls.push(data.Files[0].Url);
+          } else {
+            message.textContent = `❌ PDF yaratishda xatolik: ${file.name}`;
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+          message.textContent = `❌ Tarmoq xatosi: ${file.name}`;
+          return;
+        }
       }
 
+      // Hamma fayllar PDFga o‘zgartirildi, endi ularni birlashtiramiz
+      message.textContent = '🔗 PDF fayllar birlashtirilmoqda...';
+
+      const mergeFormData = new FormData();
+      pdfUrls.forEach((url, index) => {
+        mergeFormData.append(`Files[${index}]`, url);
+      });
+
       try {
-        const res = await fetch(`${convertApiUrl}merge/pdf?Secret=${secret}`, {
+        const mergeRes = await fetch(`https://v2.convertapi.com/convert/merge/pdf?Secret=${secret}`, {
           method: 'POST',
-          body: formData
+          body: mergeFormData
         });
 
-        const data = await res.json();
-
-        if (data.Files && data.Files.length > 0) {
-          downloadLink.href = data.Files[0].Url;
+        const mergeData = await mergeRes.json();
+        if (mergeData.Files && mergeData.Files.length > 0) {
+          downloadLink.href = mergeData.Files[0].Url;
           downloadSection.classList.remove('hidden');
-          message.textContent = '✅ Fayl tayyor!';
+          message.textContent = '✅ Barcha fayllar bitta PDF faylga birlashtirildi!';
         } else {
-          message.textContent = '❌ Xatolik: PDF yaratilmadi.';
+          message.textContent = '❌ Fayllarni birlashtirishda xatolik.';
         }
       } catch (err) {
         console.error(err);
-        message.textContent = '❌ Server bilan bog‘lanishda xatolik.';
+        message.textContent = '❌ Birlashtirishda tarmoq xatosi.';
       }
     });
   </script>
