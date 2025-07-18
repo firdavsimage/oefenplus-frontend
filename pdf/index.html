@@ -1,37 +1,68 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Konvertor - Oefen.uz</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Konvertor – Oefen</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: linear-gradient(135deg, #FF973F, #B33F21);
-    }
-  </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
 
-  <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
-    <a href="https://oefen.uz">
-      <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
-    </a>
-    <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
-  </header>
-
-  <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
-    <h2 class="text-xl font-semibold mb-6">Faylni PDF formatga o‘tkazish</h2>
-
-    <!-- ✅ Form: backend ga POST yuboradi -->
-    <form id="uploadForm" action="https://oefenplus-backend-pdf.onrender.com/convert" method="POST" enctype="multipart/form-data">
-      <label class="block mb-2 font-medium">📂 Rasm, Word, PowerPoint fayllarni tanlang:</label>
-      <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.doc,.docx,.ppt,.pptx" required class="mb-4 w-full p-2 border rounded" />
-      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">PDF yaratish</button>
+  <div class="bg-white shadow-2xl rounded-2xl p-6 max-w-md w-full">
+    <h1 class="text-2xl font-semibold text-center mb-4">Faylni PDF formatga o‘tkazish</h1>
+    
+    <form id="uploadForm" class="space-y-4">
+      <label class="block text-gray-700">📂 Rasm, Word, PowerPoint fayllarni tanlang:</label>
+      <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.docx,.pptx" required class="w-full border rounded p-2">
+      
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">PDFga o‘tkazish</button>
     </form>
 
-    <p class="mt-4 text-sm text-gray-700">Bir nechta fayl tanlansa, ular bitta PDF qilib birlashtiriladi.</p>
-  </section>
+    <div id="result" class="mt-4 text-center text-green-600 font-medium hidden"></div>
+    <div id="error" class="mt-4 text-center text-red-500 font-medium hidden"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const result = document.getElementById('result');
+    const error = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      result.classList.add('hidden');
+      error.classList.add('hidden');
+
+      const fileInput = document.getElementById('fileInput');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const response = await fetch('https://YOUR_BACKEND_URL/convert', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          error.textContent = errData.error || 'Xatolik yuz berdi';
+          error.classList.remove('hidden');
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "converted.pdf";
+        a.click();
+        result.textContent = "✅ PDF tayyor. Yuklab olish boshlandi.";
+        result.classList.remove('hidden');
+      } catch (err) {
+        error.textContent = "Xatolik yuz berdi: " + err.message;
+        error.classList.remove('hidden');
+      }
+    });
+  </script>
 
 </body>
 </html>
