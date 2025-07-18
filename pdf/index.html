@@ -23,102 +23,15 @@
   <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
     <h2 class="text-xl font-semibold mb-6">Faylni PDF formatga o‘tkazish</h2>
 
-    <form id="uploadForm">
-      <label class="block mb-2 font-medium">📂 Rasm yoki hujjat(lar) tanlang:</label>
-      <input type="file" id="fileInput" name="files" multiple required class="mb-4 w-full p-2 border rounded" />
+    <!-- ✅ Form: backend ga POST yuboradi -->
+    <form id="uploadForm" action="https://oefenplus-backend-pdf.onrender.com/convert" method="POST" enctype="multipart/form-data">
+      <label class="block mb-2 font-medium">📂 Rasm, Word, PowerPoint fayllarni tanlang:</label>
+      <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.doc,.docx,.ppt,.pptx" required class="mb-4 w-full p-2 border rounded" />
       <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">PDF yaratish</button>
     </form>
 
-    <div id="message" class="mt-4 font-semibold text-green-800"></div>
-
-    <div id="downloadSection" class="mt-4 hidden">
-      <a id="downloadLink" class="text-blue-700 underline font-semibold" href="#" download>📥 PDF faylni yuklab olish</a>
-    </div>
+    <p class="mt-4 text-sm text-gray-700">Bir nechta fayl tanlansa, ular bitta PDF qilib birlashtiriladi.</p>
   </section>
 
-  <script>
-    const form = document.getElementById('uploadForm');
-    const fileInput = document.getElementById('fileInput');
-    const message = document.getElementById('message');
-    const downloadLink = document.getElementById('downloadLink');
-    const downloadSection = document.getElementById('downloadSection');
-    const secret = 'secret_key_585ab4d86b672f4a7cf317577eeed234_o1iAu2ae4130c0faea3f83fb367acc19c247d';
-
-    const getConvertEndpoint = (filename) => {
-      const ext = filename.split('.').pop().toLowerCase();
-      if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') return 'jpg/to/pdf';
-      if (ext === 'doc' || ext === 'docx') return 'docx/to/pdf';
-      if (ext === 'ppt' || ext === 'pptx') return 'pptx/to/pdf';
-      return null;
-    };
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      message.textContent = '⏳ Yuklanmoqda va PDF ga aylantirilmoqda...';
-      downloadSection.classList.add('hidden');
-
-      const files = fileInput.files;
-      if (files.length === 0) return alert("Fayl tanlanmadi");
-
-      const pdfUrls = [];
-
-      for (const file of files) {
-        const endpoint = getConvertEndpoint(file.name);
-        if (!endpoint) {
-          message.textContent = `❌ Format qo‘llab-quvvatlanmaydi: ${file.name}`;
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-          const res = await fetch(`https://v2.convertapi.com/convert/${endpoint}?Secret=${secret}`, {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await res.json();
-          if (data.Files && data.Files.length > 0) {
-            pdfUrls.push(data.Files[0].Url);
-          } else {
-            message.textContent = `❌ PDF yaratishda xatolik: ${file.name}`;
-            return;
-          }
-        } catch (err) {
-          console.error(err);
-          message.textContent = `❌ Tarmoq xatosi: ${file.name}`;
-          return;
-        }
-      }
-
-      // Hamma fayllar PDFga o‘zgartirildi, endi ularni birlashtiramiz
-      message.textContent = '🔗 PDF fayllar birlashtirilmoqda...';
-
-      const mergeFormData = new FormData();
-      pdfUrls.forEach((url, index) => {
-        mergeFormData.append(`Files[${index}]`, url);
-      });
-
-      try {
-        const mergeRes = await fetch(`https://v2.convertapi.com/convert/merge/pdf?Secret=${secret}`, {
-          method: 'POST',
-          body: mergeFormData
-        });
-
-        const mergeData = await mergeRes.json();
-        if (mergeData.Files && mergeData.Files.length > 0) {
-          downloadLink.href = mergeData.Files[0].Url;
-          downloadSection.classList.remove('hidden');
-          message.textContent = '✅ Barcha fayllar bitta PDF faylga birlashtirildi!';
-        } else {
-          message.textContent = '❌ Fayllarni birlashtirishda xatolik.';
-        }
-      } catch (err) {
-        console.error(err);
-        message.textContent = '❌ Birlashtirishda tarmoq xatosi.';
-      }
-    });
-  </script>
 </body>
 </html>
