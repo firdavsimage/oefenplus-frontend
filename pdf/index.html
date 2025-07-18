@@ -23,6 +23,90 @@
   <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
     <h2 class="text-xl font-semibold mb-6">Faylni PDF formatga o‘tkazish</h2>
 
+    <form id="uploadForm">
+      <label class="block mb-2 font-medium">📂 Rasm yoki hujjat(lar) tanlang:</label>
+      <input type="file" id="fileInput" name="files" multiple required class="mb-4 w-full p-2 border rounded" />
+      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">PDF yaratish</button>
+    </form>
+
+    <div id="message" class="mt-4 font-semibold text-green-800"></div>
+
+    <div id="downloadSection" class="mt-4 hidden">
+      <a id="downloadLink" class="text-blue-700 underline font-semibold" href="#" download>📥 PDF faylni yuklab olish</a>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const message = document.getElementById('message');
+    const downloadLink = document.getElementById('downloadLink');
+    const downloadSection = document.getElementById('downloadSection');
+
+    const convertApiUrl = 'https://v2.convertapi.com/convert/';
+    const secret = 'secret_key_cb327f74110b4e506fec5ac629878293_SkxGg3f96e8bcdd9594d8e575c15d3dab7b99';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = '⏳ Yuklanmoqda va konvertatsiya qilinmoqda...';
+      downloadSection.classList.add('hidden');
+
+      const files = fileInput.files;
+      if (files.length === 0) return alert("Fayl tanlanmadi");
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('Files', files[i]);
+      }
+
+      try {
+        const res = await fetch(`${convertApiUrl}merge/pdf?Secret=${secret}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.Files && data.Files.length > 0) {
+          downloadLink.href = data.Files[0].Url;
+          downloadSection.classList.remove('hidden');
+          message.textContent = '✅ Fayl tayyor!';
+        } else {
+          message.textContent = '❌ Xatolik: PDF yaratilmadi.';
+        }
+      } catch (err) {
+        console.error(err);
+        message.textContent = '❌ Server bilan bog‘lanishda xatolik.';
+      }
+    });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Konvertor - Oefen.uz</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #FF973F, #B33F21);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-900">
+
+  <header class="w-full max-w-4xl flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md" style="background-color: #87BD6A;">
+    <a href="https://oefen.uz">
+      <img src="https://oefen.uz/assets/img/logo.png" alt="Oefen.uz Logo" class="h-16">
+    </a>
+    <a href="https://oefen.uz" class="text-white text-lg underline">Bosh sahifa</a>
+  </header>
+
+  <section class="w-full max-w-4xl bg-white bg-opacity-95 rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-semibold mb-6">Faylni PDF formatga o‘tkazish</h2>
+
     <form id="uploadForm" enctype="multipart/form-data">
       <label class="block mb-2 font-medium">📂 Rasm yoki hujjat(lar) tanlang:</label>
       <input type="file" id="fileInput" name="files" multiple required class="mb-4 w-full p-2 border rounded" />
