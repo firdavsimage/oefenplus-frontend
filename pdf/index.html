@@ -6,22 +6,16 @@
   <title>PDF Konvertor</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    body {
-      background: linear-gradient(to bottom right, #FF973F, #B33F21);
-    }
+    body { background: linear-gradient(to bottom right, #FF973F, #B33F21); }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center px-4">
   <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-xl">
     <h1 class="text-2xl font-bold mb-4 text-center text-green-700">Faylni PDF formatga o‘tkazish</h1>
-
     <form id="uploadForm" enctype="multipart/form-data">
       <input type="file" name="files" id="files" multiple required class="block w-full mb-4 border p-2 rounded">
-      <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded w-full hover:bg-green-700">
-        Yuborish
-      </button>
+      <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded w-full hover:bg-green-700">Yuborish</button>
     </form>
-
     <div id="status" class="text-center mt-4 text-gray-700 hidden"></div>
   </div>
 
