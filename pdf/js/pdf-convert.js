@@ -21,7 +21,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
   }
 
   try {
-    const response = await fetch('https://oefenplus-backend-ilovepdf.onrender.com/api/convert', {
+    const response = await fetch('https://oefenplus-backend-pdf.onrender.com/api/convert', {
       method: 'POST',
       body: formData
     });
@@ -30,7 +30,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
     if (response.ok && data.download_url) {
       message.textContent = '✅ PDF fayl tayyor!';
-      downloadLink.href = `https://oefenplus-backend-ilovepdf.onrender.com${data.download_url}`;
+      downloadLink.href = `https://oefenplus-backend-pdf.onrender.com${data.download_url}`;
       downloadSection.classList.remove('hidden');
     } else {
       message.textContent = '❌ Xatolik: ' + (data.error || 'PDF yaratilolmadi.');
