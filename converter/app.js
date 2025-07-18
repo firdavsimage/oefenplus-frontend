@@ -1,21 +1,38 @@
-// converter/app.js
-document.getElementById('compressForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
+const fileInput = document.getElementById("fileInput");
+const compressBtn = document.getElementById("compressBtn");
+const loadingDiv = document.getElementById("loading");
+const resultDiv = document.getElementById("result");
+const downloadLink = document.getElementById("downloadLink");
 
-  const res = await fetch('https://oefenplus-backend.onrender.com/convertor', {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!res.ok) {
-    alert("Siqishda xatolik yuz berdi.");
+compressBtn.addEventListener("click", async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Iltimos, fayl tanlang.");
     return;
   }
 
-  const blob = await res.blob();
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = "compressed-file";
-  link.click();
-};
+  loadingDiv.classList.remove("hidden");
+  resultDiv.classList.add("hidden");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("https://oefenplus-backend-converter.onrender.com/compress", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) throw new Error("Siqishda xatolik yuz berdi.");
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    downloadLink.href = url;
+    downloadLink.download = "compressed-" + file.name;
+    resultDiv.classList.remove("hidden");
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    loadingDiv.classList.add("hidden");
+  }
+});
