@@ -1,43 +1,42 @@
-document.getElementById("uploadForm").onsubmit = async (e) => {
+document.getElementById('uploadForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
-  const input = document.getElementById("fileInput");
-  const files = input.files;
+  const fileInput = document.getElementById('fileInput');
+  const message = document.getElementById('message');
+  const downloadSection = document.getElementById('downloadSection');
+  const downloadLink = document.getElementById('downloadLink');
 
-  if (!files.length) {
-    alert("Iltimos, kamida bitta fayl tanlang.");
+  message.textContent = '⏳ Fayllar yuklanmoqda va PDFga aylantirilmoqda...';
+  downloadSection.classList.add('hidden');
+
+  const files = fileInput.files;
+  if (files.length === 0) {
+    message.textContent = '❌ Iltimos, kamida bitta fayl tanlang.';
     return;
   }
 
   const formData = new FormData();
   for (let i = 0; i < files.length; i++) {
-    formData.append("file", files[i]); // "file" nomi backendga mos
+    formData.append('files', files[i]);
   }
 
-  const message = document.getElementById("message");
-  const downloadSection = document.getElementById("downloadSection");
-  const downloadLink = document.getElementById("downloadLink");
-
-  message.textContent = "⏳ Konvertatsiya qilinmoqda...";
-  downloadSection.classList.add("hidden");
-
   try {
-    const res = await fetch("https://oefenplus-backend-pdf.onrender.com/api/convert", {
-      method: "POST",
+    const response = await fetch('https://oefenplus-backend-ilovepdf.onrender.com/api/convert', {
+      method: 'POST',
       body: formData
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (data.downloadUrl) {
-      downloadLink.href = "https://oefenplus-backend-pdf.onrender.com" + data.downloadUrl;
-      downloadLink.textContent = "📥 PDF faylni yuklab olish";
-      downloadSection.classList.remove("hidden");
-      message.textContent = "✅ PDF fayl tayyor!";
+    if (response.ok && data.download_url) {
+      message.textContent = '✅ PDF fayl tayyor!';
+      downloadLink.href = `https://oefenplus-backend-ilovepdf.onrender.com${data.download_url}`;
+      downloadSection.classList.remove('hidden');
     } else {
-      message.textContent = "❌ Xatolik yuz berdi: " + (data.error || "noaniq xato");
+      message.textContent = '❌ Xatolik: ' + (data.error || 'PDF yaratilolmadi.');
     }
-  } catch (err) {
-    message.textContent = "❌ Server bilan ulanishda xatolik.";
+  } catch (error) {
+    console.error(error);
+    message.textContent = '❌ Server bilan bog‘lanib bo‘lmadi.';
   }
-};
+});
