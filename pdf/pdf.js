@@ -3,10 +3,18 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
   const fileInput = document.getElementById('fileInput');
   const status = document.getElementById('status');
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
+  const file = fileInput.files[0];
 
-  status.textContent = 'Yuklanmoqda...';
+  // ✅ Fayl tanlanganligini tekshirish
+  if (!file) {
+    status.textContent = '❌ Iltimos, fayl tanlang.';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  status.textContent = '⏳ Yuklanmoqda...';
 
   try {
     const response = await fetch('https://oefenplus-backend-pdf-1.onrender.com/convert', {
@@ -15,7 +23,8 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     });
 
     if (!response.ok) {
-      throw new Error('Xatolik yuz berdi.');
+      const errorText = await response.text(); // ✳️ Backenddan xabar chiqarish
+      throw new Error('Serverdan javob: ' + errorText);
     }
 
     const blob = await response.blob();
@@ -28,8 +37,9 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     a.click();
     a.remove();
 
-    status.textContent = '✅ PDF tayyor! Yuborilgan faylni yuklab oldingiz.';
+    status.textContent = '✅ PDF tayyor! Yuklab olish boshlandi.';
   } catch (error) {
     status.textContent = '❌ Xatolik: ' + error.message;
+    console.error(error);
   }
 });
