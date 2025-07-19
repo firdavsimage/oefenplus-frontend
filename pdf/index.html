@@ -10,12 +10,13 @@
   <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">Faylni PDF ga aylantirish</h1>
     <form id="uploadForm">
-      <input type="file" id="fileInput" name="file" class="mb-4 w-full" required>
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Yuklash</button>
+      <input type="file" id="fileInput" name="file" class="mb-4 w-full border p-2 rounded" accept=".jpg,.png,.docx,.pptx,.xlsx" required>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Yuklash</button>
     </form>
-    <div id="status" class="mt-4 text-green-600"></div>
+    <div id="status" class="mt-4 text-red-600 font-medium"></div>
   </div>
 
- <script src="/pdf/pdf.js"></script>
+  <!-- ✅ To'g'ri JavaScript yo'lini ko'rsatish -->
+  <script src="/pdf/pdf.js"></script>
 </body>
 </html>
