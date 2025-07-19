@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>PDF Konvertor - Oefen.uz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="https://oefen.uz/assets/img/logo.png" type="image/png" />
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
@@ -56,14 +57,12 @@
       ppt: document.getElementById("ppt")
     };
 
-    // Clear other inputs and download link when a new file is selected
+    // Fayl tanlaganda boshqa inputlar tozalanadi, link yashiriladi
     Object.values(inputs).forEach(input => {
       input.addEventListener('change', () => {
-        // Hide download link
         downloadDiv.classList.add("hidden");
         fileLink.href = "#";
 
-        // Clear other inputs except the current one
         Object.entries(inputs).forEach(([key, otherInput]) => {
           if (otherInput !== input) {
             otherInput.value = '';
@@ -72,7 +71,7 @@
       });
     });
 
-    // Form submit
+    // Submit tugmasi
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -105,6 +104,13 @@
         alert("Xatolik yuz berdi: " + err.message);
       }
     });
+
+    // Backend uxlamasligi uchun ping funksiyasi
+    setInterval(() => {
+      fetch("https://oefenplus-backend-pdf-1.onrender.com/ping")
+        .then(() => console.log("Ping yuborildi"))
+        .catch(() => console.warn("Pingda xatolik"));
+    }, 14 * 60 * 1000); // Har 14 daqiqada ping
   </script>
 </body>
 </html>
