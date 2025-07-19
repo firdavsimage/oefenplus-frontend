@@ -40,6 +40,13 @@
         Konvertatsiya qilish
       </button>
     </form>
+    <div id="loadingDiv" class="mt-4 hidden text-center text-blue-700 font-semibold flex items-center gap-2">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-700" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v5a1 1 0 00.553.894l3 1.5a1 1 0 10.894-1.788L11 10.382V5z" clip-rule="evenodd" />
+  </svg>
+  <span>Natija tayyorlanmoqda...</span>
+</div>
+
     <div id="downloadLink" class="mt-4 hidden">
       <a id="fileLink" href="#" class="text-blue-600 underline" download>PDF-ni yuklab olish</a>
     </div>
@@ -47,6 +54,7 @@
 
   <!-- Script -->
   <script>
+    const loadingDiv = document.getElementById("loadingDiv");
     const form = document.getElementById("uploadForm");
     const downloadDiv = document.getElementById("downloadLink");
     const fileLink = document.getElementById("fileLink");
@@ -72,38 +80,44 @@
     });
 
     // Submit tugmasi
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
+form.addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-      const formData = new FormData();
-      const images = inputs.images.files;
-      const word = inputs.word.files[0];
-      const ppt = inputs.ppt.files[0];
+  downloadDiv.classList.add("hidden");
+  fileLink.href = "#";
+  loadingDiv.classList.remove("hidden"); // 👈 loading ko‘rsat
 
-      for (let i = 0; i < images.length; i++) {
-        formData.append("images", images[i]);
-      }
-      if (word) formData.append("word", word);
-      if (ppt) formData.append("ppt", ppt);
+  const formData = new FormData();
+  const images = inputs.images.files;
+  const word = inputs.word.files[0];
+  const ppt = inputs.ppt.files[0];
 
-      try {
-        const res = await fetch("https://oefenplus-backend-pdf-1.onrender.com/convert", {
-          method: "POST",
-          body: formData
-        });
+  for (let i = 0; i < images.length; i++) {
+    formData.append("images", images[i]);
+  }
+  if (word) formData.append("word", word);
+  if (ppt) formData.append("ppt", ppt);
 
-        if (!res.ok) throw new Error("Konvertatsiyada xatolik: " + res.status);
-
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        fileLink.href = url;
-        fileLink.download = "converted.pdf";
-        downloadDiv.classList.remove("hidden");
-      } catch (err) {
-        alert("Xatolik yuz berdi: " + err.message);
-      }
+  try {
+    const res = await fetch("https://oefenplus-backend-pdf-1.onrender.com/convert", {
+      method: "POST",
+      body: formData
     });
+
+    if (!res.ok) throw new Error("Konvertatsiyada xatolik: " + res.status);
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    fileLink.href = url;
+    fileLink.download = "converted.pdf";
+    downloadDiv.classList.remove("hidden");
+  } catch (err) {
+    alert("Xatolik yuz berdi: " + err.message);
+  } finally {
+    loadingDiv.classList.add("hidden"); // 👈 loading yashir
+  }
+});
 
     // Backend uxlamasligi uchun ping funksiyasi
     setInterval(() => {
