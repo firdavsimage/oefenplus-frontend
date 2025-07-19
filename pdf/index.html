@@ -32,6 +32,25 @@
   </div>
 
   <script>
+    // Fayl tanlaganda boshqa inputlarni tozalash va yuklab olish linkini yashirish
+    const inputs = ["images", "word", "ppt"];
+    inputs.forEach((id) => {
+      document.getElementById(id).addEventListener("change", () => {
+        // Boshqa inputlarni tozalash
+        inputs.forEach((otherId) => {
+          if (otherId !== id) {
+            document.getElementById(otherId).value = "";
+          }
+        });
+        // Yuklab olish linkini yashirish
+        document.getElementById("downloadLink").classList.add("hidden");
+        const link = document.getElementById("fileLink");
+        link.href = "#";
+        link.textContent = "";
+      });
+    });
+
+    // Formani yuborish
     document.getElementById("uploadForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const formData = new FormData();
@@ -40,11 +59,19 @@
       const word = document.getElementById("word").files[0];
       const ppt = document.getElementById("ppt").files[0];
 
-      for (let i = 0; i < images.length; i++) {
-        formData.append("images", images[i]);
+      // Tanlangan fayl turiga qarab FormData'ga qo‘shish
+      if (images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          formData.append("images", images[i]);
+        }
+      } else if (word) {
+        formData.append("word", word);
+      } else if (ppt) {
+        formData.append("ppt", ppt);
+      } else {
+        alert("Iltimos, fayl tanlang.");
+        return;
       }
-      if (word) formData.append("word", word);
-      if (ppt) formData.append("ppt", ppt);
 
       try {
         const res = await fetch("https://oefenplus-backend-pdf-1.onrender.com/convert", {
@@ -60,6 +87,7 @@
         const link = document.getElementById("fileLink");
         link.href = url;
         link.download = "converted.pdf";
+        link.textContent = "PDF-ni yuklab olish";
         document.getElementById("downloadLink").classList.remove("hidden");
 
       } catch (err) {
