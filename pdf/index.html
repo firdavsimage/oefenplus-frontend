@@ -5,9 +5,22 @@
   <title>PDF Konvertor - Oefen.uz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #FF973F, #B33F21);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
-  <div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-md">
+<body class="text-gray-800">
+  <!-- Header -->
+  <header class="w-full max-w-4xl mx-auto flex justify-between items-center mb-10 px-6 py-4 rounded-xl shadow-md"
+          style="background-color: #87BD6A;">
+    <img src="https://oefen.uz/assets/img/logo.png" alt="Logo" class="h-10">
+    <a href="https://oefen.uz" class="text-white font-semibold text-lg hover:underline">Bosh sahifa</a>
+  </header>
+
+  <!-- Main -->
+  <div class="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md">
     <h2 class="text-2xl font-bold mb-4">PDF Konvertor</h2>
     <form id="uploadForm" enctype="multipart/form-data" class="space-y-4">
       <div>
@@ -31,14 +44,42 @@
     </div>
   </div>
 
+  <!-- Script -->
   <script>
-    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formData = new FormData();
+    const form = document.getElementById("uploadForm");
+    const downloadDiv = document.getElementById("downloadLink");
+    const fileLink = document.getElementById("fileLink");
 
-      const images = document.getElementById("images").files;
-      const word = document.getElementById("word").files[0];
-      const ppt = document.getElementById("ppt").files[0];
+    const inputs = {
+      images: document.getElementById("images"),
+      word: document.getElementById("word"),
+      ppt: document.getElementById("ppt")
+    };
+
+    // Clear other inputs and download link when a new file is selected
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('change', () => {
+        // Hide download link
+        downloadDiv.classList.add("hidden");
+        fileLink.href = "#";
+
+        // Clear other inputs except the current one
+        Object.entries(inputs).forEach(([key, otherInput]) => {
+          if (otherInput !== input) {
+            otherInput.value = '';
+          }
+        });
+      });
+    });
+
+    // Form submit
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      const images = inputs.images.files;
+      const word = inputs.word.files[0];
+      const ppt = inputs.ppt.files[0];
 
       for (let i = 0; i < images.length; i++) {
         formData.append("images", images[i]);
@@ -57,11 +98,9 @@
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
 
-        const link = document.getElementById("fileLink");
-        link.href = url;
-        link.download = "converted.pdf";
-        document.getElementById("downloadLink").classList.remove("hidden");
-
+        fileLink.href = url;
+        fileLink.download = "converted.pdf";
+        downloadDiv.classList.remove("hidden");
       } catch (err) {
         alert("Xatolik yuz berdi: " + err.message);
       }
