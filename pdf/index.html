@@ -2,103 +2,70 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
+  <title>PDF Konvertor - Oefen.uz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Konvertor</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-4">PDF Konvertor</h2>
+    <form id="uploadForm" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block font-medium">Rasm fayllar (JPG, PNG):</label>
+        <input type="file" name="images" id="images" multiple class="mt-1">
+      </div>
+      <div>
+        <label class="block font-medium">Word fayl (.docx):</label>
+        <input type="file" name="word" id="word" class="mt-1">
+      </div>
+      <div>
+        <label class="block font-medium">PowerPoint fayl (.pptx):</label>
+        <input type="file" name="ppt" id="ppt" class="mt-1">
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Konvertatsiya qilish
+      </button>
+    </form>
+    <div id="downloadLink" class="mt-4 hidden">
+      <a id="fileLink" href="#" class="text-blue-600 underline" download>PDF-ni yuklab olish</a>
+    </div>
+  </div>
+
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const inputs = ["images", "word", "ppt"];
-      const form = document.getElementById("uploadForm");
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData();
 
-      inputs.forEach((id) => {
-        document.getElementById(id).addEventListener("change", () => {
-          // Boshqa inputlarni tozalash (DOM orqali)
-          inputs.forEach((otherId) => {
-            if (otherId !== id) {
-              const input = document.getElementById(otherId);
-              const newInput = input.cloneNode(); // yangi input yaratamiz
-              newInput.id = otherId;
-              newInput.name = otherId;
-              newInput.className = input.className;
-              newInput.accept = input.accept;
-              input.parentNode.replaceChild(newInput, input);
-            }
-          });
+      const images = document.getElementById("images").files;
+      const word = document.getElementById("word").files[0];
+      const ppt = document.getElementById("ppt").files[0];
 
-          // Yuklab olish linkini yashirish
-          const downloadLink = document.getElementById("downloadLink");
-          downloadLink.classList.add("hidden");
-          const link = document.getElementById("fileLink");
-          link.href = "#";
-          link.textContent = "";
+      for (let i = 0; i < images.length; i++) {
+        formData.append("images", images[i]);
+      }
+      if (word) formData.append("word", word);
+      if (ppt) formData.append("ppt", ppt);
+
+      try {
+        const res = await fetch("https://oefenplus-backend-pdf-1.onrender.com/convert", {
+          method: "POST",
+          body: formData
         });
-      });
 
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const formData = new FormData();
+        if (!res.ok) throw new Error("Konvertatsiyada xatolik: " + res.status);
 
-        const imagesInput = document.getElementById("images");
-        const wordInput = document.getElementById("word");
-        const pptInput = document.getElementById("ppt");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
 
-        if (imagesInput.files.length > 0) {
-          for (const file of imagesInput.files) {
-            formData.append("images", file);
-          }
-        } else if (wordInput.files.length > 0) {
-          formData.append("word", wordInput.files[0]);
-        } else if (pptInput.files.length > 0) {
-          formData.append("ppt", pptInput.files[0]);
-        } else {
-          alert("Iltimos, fayl tanlang!");
-          return;
-        }
+        const link = document.getElementById("fileLink");
+        link.href = url;
+        link.download = "converted.pdf";
+        document.getElementById("downloadLink").classList.remove("hidden");
 
-        try {
-          const res = await fetch("https://oefenplus-backend-pdf-1.onrender.com/convert", {
-            method: "POST",
-            body: formData
-          });
-
-          if (!res.ok) throw new Error("Serverdan xatolik!");
-
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          const link = document.getElementById("fileLink");
-          link.href = url;
-          link.download = "converted.pdf";
-          link.textContent = "PDFni yuklab olish";
-          document.getElementById("downloadLink").classList.remove("hidden");
-        } catch (err) {
-          alert("Xatolik yuz berdi: " + err.message);
-        }
-      });
+      } catch (err) {
+        alert("Xatolik yuz berdi: " + err.message);
+      }
     });
   </script>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; background-color: #f9f9f9; }
-    input { margin: 10px 0; }
-    .hidden { display: none; }
-    #downloadLink a { color: blue; text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <h2>PDF Konvertor</h2>
-  <form id="uploadForm">
-    <label>Rasmlar (JPG, PNG):</label><br>
-    <input type="file" id="images" name="images" accept="image/*" multiple /><br><br>
-
-    <label>Word fayl (.docx):</label><br>
-    <input type="file" id="word" name="word" accept=".docx" /><br><br>
-
-    <label>PowerPoint fayl (.pptx):</label><br>
-    <input type="file" id="ppt" name="ppt" accept=".pptx" /><br><br>
-
-    <button type="submit">PDFga aylantirish</button>
-  </form>
-
-  <div id="downloadLink" class="hidden">
-    <p><a id="fileLink" href="#" download>PDFni yuklab olish</a></p>
-  </div>
 </body>
 </html>
