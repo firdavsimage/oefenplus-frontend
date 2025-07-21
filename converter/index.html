@@ -30,7 +30,7 @@
     </div>
   </section>
 
- <script>
+<script>
   const fileInput = document.getElementById("fileInput");
   const compressBtn = document.getElementById("compressBtn");
   const loading = document.getElementById("loading");
@@ -51,7 +51,7 @@
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://oefenplus-backend-aniplagit.onrender.com/api/compress", {
+      const response = await fetch("https://oefenplus-backend-ilovepdf.onrender.com/api/compress", {
         method: "POST",
         body: formData
       });
@@ -63,7 +63,7 @@
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
-      // Fayl nomini aniqlash — headers ichidan yoki default nom
+      // Fayl nomi
       let filename = "compressed_" + file.name;
       const contentDisposition = response.headers.get("Content-Disposition");
       if (contentDisposition && contentDisposition.includes("filename=")) {
