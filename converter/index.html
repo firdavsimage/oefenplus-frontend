@@ -51,7 +51,7 @@
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://oefenplus-backend-ilovepdf.onrender.com/api/compress", {
+      const response = await fetch("https://oefenplus-backend-converter.onrender.com/api/compress", {
         method: "POST",
         body: formData
       });
